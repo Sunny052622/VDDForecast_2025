@@ -187,8 +187,17 @@ def load_data(use_google_sheets=True):
                 new_row = row.copy()
                 new_row['Real Item Name'] = component['Real Item Name']
                 new_row['Qty.'] = combo_qty * 1
-                new_row['Parent Category'] = component['Category']
-                new_row['Sub Category'] = component['Sub Category'] if pd.notna(component['Sub Category']) else component['Real Item Name']
+                
+                # Look up category and sub-category from nameRef based on Real Item Name
+                matching_name = df_name_ref_clean[df_name_ref_clean['Real Item Name'] == component['Real Item Name']]
+                if len(matching_name) > 0:
+                    new_row['Parent Category'] = matching_name.iloc[0]['Parent Category']
+                    new_row['Sub Category'] = matching_name.iloc[0]['Sub Category']
+                else:
+                    # Fallback to comboRef if not found in nameRef
+                    new_row['Parent Category'] = component['Category']
+                    new_row['Sub Category'] = component['Sub Category'] if pd.notna(component['Sub Category']) else component['Real Item Name']
+                
                 combo_exploded_list.append(new_row)
         
         if combo_exploded_list:
@@ -1872,7 +1881,7 @@ with tab9:
                     'Chicken Cigar Roll', 'Veg Cigar Roll', 'Himalayan Momo',
                     'Veg Frankie', 'Chicken Frankie', 'Mutton Frankie ',  # Note: trailing space
                     'Chicken Wonton', 'Prawn Wonton ', 'Veg Wonton',  # Note: Prawn has trailing space
-                    'Mutton Sha-Phaley'
+                    'Chicken Sha-Phaley', 'Mutton Sha-Phaley'
                 ]
                 
                 # Calculate next two weeks' date ranges
